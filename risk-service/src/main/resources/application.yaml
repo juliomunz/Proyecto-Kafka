@@ -1,0 +1,34 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: risk-service
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  kafka:
+    bootstrap-servers: localhost:29092
+    consumer:
+      group-id: risk-group-v2
+      auto-offset-reset: earliest
+      # 1. Usamos el ErrorHandlingDeserializer para que no se bloquee la app si hay error
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        # 2. Configuramos el deserializador real dentro del manejador de errores
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        spring.json.trusted.packages: "*"
+        # 3. Forzamos a que use nuestra clase de evento, ignorando lo que diga el mensaje
+        spring.json.value.default.type: com.banco.kafka.risk_service.event.TransferenciaIniciadaEvent
+        spring.json.use.type.headers: false
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+logging:
+  level:
+    org.apache.kafka: WARN
+    org.springframework.kafka: WARN

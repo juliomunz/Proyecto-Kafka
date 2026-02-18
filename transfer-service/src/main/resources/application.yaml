@@ -1,0 +1,32 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: transfer-service
+
+  # 1. Configuración de PostgreSQL
+  datasource:
+    url: jdbc:postgresql://localhost:5433/bank_db
+    username: bank_user
+    password: bank_password
+  jpa:
+    hibernate:
+      ddl-auto: update # Hibernate creará la tabla automáticamente por ahora
+    show-sql: true
+
+  # 2. Configuración de Kafka
+  kafka:
+    bootstrap-servers: localhost:29092 # El puerto externo que expusimos en Docker
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      group-id: transfer-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        spring.json.trusted.packages: "*" # Permite deserializar cualquier JSON a nuestras clases Java
+        spring.json.value.default.type: com.banco.kafka.transfer_service.event.TransferenciaEvaluadaEvent
+        spring.json.use.type.headers: false
