@@ -27,6 +27,7 @@ agent any
                 sh 'ls -la ./transfer-service'
                 sh 'docker build -t mi-banco/transfer-service:latest ./transfer-service'
             }
+         }
     }
 
     post {
