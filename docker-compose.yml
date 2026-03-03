@@ -60,4 +60,5 @@ services:
 
 networks:
   bank-network:
+    name: bank-network
     driver: bridge
