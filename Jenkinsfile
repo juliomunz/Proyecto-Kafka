@@ -24,7 +24,7 @@ agent any
         stage('3. Build Docker Image (transfer-service)') {
             steps {
                 sh 'cat ./transfer-service/Dockerfile'
-                sh 'docker build -t mi-banco/transfer-service:latest ./transfer-service'
+                sh 'docker build --no-cache -t mi-banco/transfer-service:latest ./transfer-service'
             }
         }
     }
