@@ -1,6 +1,8 @@
 pipeline {
-    agent any // Jenkins utilizará cualquier nodo disponible para ejecutar pipe.
-
+agent any
+    environment {
+        DOCKER_API_VERSION = '1.43'
+    }
     stages {
         stage('1. Checkout Code') {
             steps {
