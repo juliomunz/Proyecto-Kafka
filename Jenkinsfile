@@ -23,7 +23,6 @@ agent any
 
         stage('3. Build Docker Image (transfer-service)') {
             steps {
-                // Este comando es infalible: nos muestra el contenido real del archivo en el servidor
                 sh 'cat ./transfer-service/Dockerfile'
                 sh 'docker build -t mi-banco/transfer-service:latest ./transfer-service'
             }
