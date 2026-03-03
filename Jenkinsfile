@@ -23,10 +23,10 @@ agent any
 
         stage('3. Build Docker Image (transfer-service)') {
             steps {
-                // Build de la imagen usando Dockerfile dentro de './transfer-service'.
+                // Este comando nos dirá qué hay realmente dentro de la carpeta
+                sh 'ls -la ./transfer-service'
                 sh 'docker build -t mi-banco/transfer-service:latest ./transfer-service'
             }
-        }
     }
 
     post {
