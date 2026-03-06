@@ -2,7 +2,6 @@ pipeline {
     agent any
     environment {
         DOCKER_API_VERSION = '1.43'
-        SONAR_URL = 'http://192.168.1.XX:9000'
     }
     stages {
         stage('1. Checkout Code') {
@@ -40,15 +39,14 @@ pipeline {
         stage('5. Auto-Deploy (Run Container)') {
             steps {
                 script {
-                    echo 'Desplegando microservicio en el ecosistema...'
                     sh 'docker rm -f transfer-service-live || true'
                     sh '''
                     docker run -d \
                         --name transfer-service-live \
-                        --network bank-network \
+                        --network proyectokafka_bank-network \
                         -p 8081:8081 \
-                        -e SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092 \
-                        -e SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/bank_db \
+                        -e SPRING_KAFKA_BOOTSTRAP_SERVERS=bank_kafka:9092 \
+                        -e SPRING_DATASOURCE_URL=jdbc:postgresql://bank_postgres:5432/bank_db \
                         mi-banco/transfer-service:latest
                     '''
                 }
