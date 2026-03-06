@@ -25,7 +25,7 @@ pipeline {
                     echo 'Iniciando análisis de calidad portátil...'
                     sh './mvnw sonar:sonar \
                         -Dsonar.host.url=http://sonarqube:9000 \
-                        -Dsonar.token=squ_f5f87e09cb7b294224bd57afd4d9f642c924a8e1'
+                        -Dsonar.token=sqa_47dcb8ddcae8be168d557338370f6d671901ba25'
                 }
             }
         }
