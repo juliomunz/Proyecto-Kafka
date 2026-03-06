@@ -1,41 +1,63 @@
 pipeline {
-agent any
+    agent any
     environment {
         DOCKER_API_VERSION = '1.43'
+        SONAR_URL = 'http://192.168.1.XX:9000'
     }
     stages {
         stage('1. Checkout Code') {
             steps {
-                // Descarga desde repo
                 checkout scm
                 echo 'Código descargado correctamente.'
             }
         }
 
-        stage('2. Build Maven (transfer-service)') {
+        stage('2. Build & Test (Maven)') {
             steps {
-                // Selecciona directorio del ms utilizando wrapper 'mvnw'.
                 dir('transfer-service') {
                     sh './mvnw clean package -DskipTests'
                 }
             }
         }
 
-        stage('3. Build Docker Image (transfer-service)') {
+        stage('3. Static Analysis (SonarQube)') {
             steps {
-                sh 'cat ./transfer-service/Dockerfile'
+                dir('transfer-service') {
+                    echo 'Iniciando análisis de calidad portátil...'
+                    sh './mvnw sonar:sonar \
+                        -Dsonar.host.url=http://sonarqube:9000 \
+                        -Dsonar.token=squ_f5f87e09cb7b294224bd57afd4d9f642c924a8e1'
+                }
+            }
+        }
+
+        stage('4. Build Image (Docker)') {
+            steps {
                 sh 'docker build --no-cache -t mi-banco/transfer-service:latest ./transfer-service'
             }
         }
-    }
 
+        stage('5. Auto-Deploy (Run Container)') {
+            steps {
+                script {
+                    echo 'Desplegando microservicio en el ecosistema...'
+                    sh 'docker rm -f transfer-service-live || true'
+                    sh '''
+                    docker run -d \
+                        --name transfer-service-live \
+                        --network bank-network \
+                        -p 8081:8081 \
+                        -e SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092 \
+                        -e SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/bank_db \
+                        mi-banco/transfer-service:latest
+                    '''
+                }
+            }
+        }
+    }
     post {
         always {
-            echo 'Limpiando espacio de trabajo...'
             cleanWs()
-        }
-        failure {
-            echo 'El pipeline falló. Revisar logs de Maven o Docker del ms transfer-service.'
         }
     }
 }

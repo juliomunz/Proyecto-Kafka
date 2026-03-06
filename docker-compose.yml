@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # 1. Base de Datos Relacional
   postgres:
     image: postgres:15-alpine
     container_name: bank_postgres
@@ -13,8 +12,9 @@ services:
       - "5433:5432"
     networks:
       - bank-network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
-  # 2. Caché
   redis:
     image: redis:7-alpine
     container_name: bank_redis
@@ -22,8 +22,9 @@ services:
       - "6379:6379"
     networks:
       - bank-network
+    volumes:
+      - redis_data:/data
 
-  # 3. Apache Kafka (Imagen Oficial, Modo KRaft)
   kafka:
     image: apache/kafka:3.7.0
     container_name: bank_kafka
@@ -44,7 +45,6 @@ services:
     networks:
       - bank-network
 
-  # 4. Interfaz Gráfica para Kafka
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: bank_kafka_ui
@@ -58,7 +58,49 @@ services:
     networks:
       - bank-network
 
+  jenkins:
+    build:
+      context: .
+      dockerfile: Dockerfile.jenkins
+    container_name: jenkins
+    privileged: true
+    user: root
+    ports:
+      - "8081:8080"
+      - "50000:50000"
+    environment:
+      - DOCKER_API_VERSION=1.43
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - bank-network
+    depends_on:
+      - postgres
+      - kafka
+      - redis
+
+  sonarqube:
+    image: sonarqube:community
+    container_name: sonarqube
+    ports:
+      - "9000:9000"
+    networks:
+      - bank-network
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+
 networks:
   bank-network:
     name: bank-network
     driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  jenkins_home:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:
