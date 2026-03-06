@@ -43,7 +43,7 @@ pipeline {
                     sh '''
                     docker run -d \
                         --name transfer-service-live \
-                        --network proyectokafka_bank-network \
+                        --network bank-network \
                         -p 8081:8081 \
                         -e SPRING_KAFKA_BOOTSTRAP_SERVERS=bank_kafka:9092 \
                         -e SPRING_DATASOURCE_URL=jdbc:postgresql://bank_postgres:5432/bank_db \
