@@ -1,35 +1,52 @@
-# Proyecto-Kafka
-Coreografía de Microservicios: Simulación Bancaria con Kafka y Redis
+# Proyecto-Kafka: Coreografía de Microservicios & CI/CD Pipeline
 
-Descripción:
-Sistema distribuido de procesamiento de transferencias en tiempo real bajo el Patrón Saga (Coreografía). El proyecto simula el flujo de una transacción desde su creación hasta su validación de riesgo y notificación final, utilizando una arquitectura orientada a eventos.
+Este repositorio contiene un sistema distribuido de procesamiento de transferencias en tiempo real bajo el **Patrón Saga (Coreografía)**, integrado con un ecosistema completo de **CI/CD** y observabilidad.
 
-Stack Tecnológico:
+## 🚀 Arquitectura y Stack Tecnológico
 
-Backend: Java 17, Spring Boot 3.x
+* **Microservicios**: Java 17, Spring Boot 3.x (Transfer, Risk, Notification, Analytics).
+* **Mensajería**: Apache Kafka (Modo KRaft).
+* **Caché & Estado**: Redis.
+* **Persistencia**: PostgreSQL.
+* **CI/CD & Calidad**: Jenkins & SonarQube.
+* **Infraestructura**: Docker & Docker Compose (Orquestación unificada).
 
-Mensajería: Apache Kafka
+## 🛠️ Pipeline de CI/CD (Jenkinsfile)
 
-Caché: Redis (Detección de fraude y límites)
+El proyecto incluye un flujo de automatización profesional con las siguientes etapas:
+1. **Checkout**: Sincronización con el repositorio remoto.
+2. **Build & Test**: Compilación con Maven Wrapper.
+3. **Static Analysis**: Escaneo de calidad de código en SonarQube mediante Tokens de seguridad.
+4. **Docker Build**: Generación de imágenes inmutables `mi-banco/transfer-service`.
+5. **Auto-Deploy**: Despliegue automatizado del contenedor en la red `bank-network` con inyección dinámica de variables de entorno.
 
-Base de Datos: PostgreSQL
+## 📦 Cómo ejecutar el Laboratorio
 
-Contenedores: Docker & Docker Compose
+Para garantizar la portabilidad del entorno, se ha unificado la infraestructura core y las herramientas de soporte en un solo manifiesto.
 
-Arquitectura del Flujo:
+### Requisitos previos
+- Docker & Docker Compose instalado. Puertos libres: 
+  - 8080 (Kafka-UI)
+  - 8081 (App)
+  - 8082 (Jenkins)
+  - 9000 (SonarQube)
+  - 5433 (Postgres)
 
-transfer-service: Recibe la petición (REST) y publica el evento transferencias-iniciadas.
+### Pasos de ejecución
+1. **Clonar el repositorio**:
+   ```bash
+   git clone https://github.com/juliomunz/Proyecto-Kafka.git
+Levantar el ecosistema completo:
 
-risk-service: Valida la transacción consultando estados en Redis. Publica el resultado en transferencias-evaluadas. Posee manejo de Dead Letter Queue (DLQ) para fallos críticos.
+Bash
+docker-compose up -d --build
+Acceso a Herramientas:
 
-notification-service: Escucha los resultados y simula el envío de alertas al usuario (Patrón Fan-out).
+Jenkins: http://localhost:8082
 
-analytics-service: Motor de analítica que procesa el volumen de transacciones y montos en tiempo real.
+SonarQube: http://localhost:9000
 
-Cómo ejecutarlo:
+Kafka-UI: http://localhost:8080
 
-Clonar el repositorio.
-
-Ir a transfer-service/ y ejecutar docker-compose up -d.
-
-Levantar cada microservicio en el orden: Transfer -> Risk -> Notification -> Analytics.
+Configuración del Pipeline
+Para ejecutar el build, cree un nuevo ítem de tipo "Pipeline" en Jenkins y apunte a este repositorio. El Jenkinsfile se encargará de orquestar el despliegue automático del microservicio transfer-service dentro del ecosistema de contenedores.
